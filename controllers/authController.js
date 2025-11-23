@@ -32,6 +32,7 @@ exports.register = (req, res) => {
 
 // Вход
 exports.login = (req, res) => {
+  console.log('Request body:', req.body);
   const { email, password } = req.body;
 
   const query = 'SELECT * FROM users WHERE email = ?';

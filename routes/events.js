@@ -7,6 +7,10 @@ const upload = require('../middleware/upload');
 // Получить все мероприятия
 router.get('/', eventController.getEvents);
 
+// Получить мероприятия по последней дате
+router.get('/latest', eventController.getLatestEvent);
+
+
 // Получить одно мероприятие
 router.get('/:id', eventController.getEventById);
 

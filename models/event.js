@@ -1,9 +1,9 @@
 const db = require('../config/db');
 
 exports.createEvent = (data, callback) => {
-  const { title, description, date, organization, category, image } = data;
-  const query = 'INSERT INTO events (title, description, date, organization, category, image) VALUES (?, ?, ?, ?, ?, ?)';
-  db.query(query, [title, description, date, organization, category, image], callback);
+  const { title, description, date, organization, category, image, location } = data;
+  const query = 'INSERT INTO events (title, description, date, organization, category, image, location) VALUES (?, ?, ?, ?, ?, ?, ?)';
+  db.query(query, [title, description, date, organization, category, image, location], callback);
 };
 
 exports.getEvents = (category, callback) => {
@@ -18,9 +18,9 @@ exports.getEventById = (id, callback) => {
 };
 
 exports.updateEvent = (id, data, callback) => {
-  const { title, description, date, organization, category, image } = data;
-  let query = 'UPDATE events SET title = ?, description = ?, date = ?, organization = ?, category = ?';
-  const params = [title, description, date, organization, category];
+  const { title, description, date, organization, category, image, location } = data;
+  let query = 'UPDATE events SET title = ?, description = ?, date = ?, organization = ?, category = ?, location = ?';
+  const params = [title, description, date, organization, category, location];
   if (image) {
     query += ', image = ?';
     params.push(image);

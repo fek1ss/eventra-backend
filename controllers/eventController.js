@@ -2,11 +2,11 @@ const db = require('../config/db');
 
 // Создание мероприятия (админ)
 exports.createEvent = (req, res) => {
-  const { title, description, date, organization, category } = req.body;
+  const { title, description, date, organization, category, location } = req.body;
   const image = req.file ? req.file.filename : null;
 
-  const query = 'INSERT INTO events (title, description, date, organization, category, image) VALUES (?, ?, ?, ?, ?, ?)';
-  db.query(query, [title, description, date, organization, category, image], (err, results) => {
+  const query = 'INSERT INTO events (title, description, date, organization, category, image, location) VALUES (?, ?, ?, ?, ?, ?, ?)';
+  db.query(query, [title, description, date, organization, category, image, location], (err, results) => {
     if (err) return res.status(500).json({ message: err.message });
     res.status(201).json({ message: 'Мероприятие создано', eventId: results.insertId });
   });
@@ -24,6 +24,17 @@ exports.getEvents = (req, res) => {
   });
 };
 
+// Получить последнее мероприятие по дате
+exports.getLatestEvent = (req, res) => {
+  const query = 'SELECT * FROM events ORDER BY date DESC LIMIT 1';
+  db.query(query, (err, results) => {
+    if (err) return res.status(500).json({ message: err.message });
+    if (results.length === 0) return res.status(404).json({ message: 'Мероприятия не найдены' });
+    res.json(results[0]);
+  });
+};
+
+
 // Получить одно мероприятие
 exports.getEventById = (req, res) => {
   const { id } = req.params;
@@ -38,11 +49,11 @@ exports.getEventById = (req, res) => {
 // Обновление мероприятия (админ)
 exports.updateEvent = (req, res) => {
   const { id } = req.params;
-  const { title, description, date, organization, category } = req.body;
+  const { title, description, date, organization, category, location } = req.body;
   const image = req.file ? req.file.filename : null;
 
-  let query = 'UPDATE events SET title = ?, description = ?, date = ?, organization = ?, category = ?';
-  const params = [title, description, date, organization, category];
+  let query = 'UPDATE events SET title = ?, description = ?, date = ?, organization = ?, category = ?, location = ?';
+  const params = [title, description, date, organization, category, location];
   if (image) {
     query += ', image = ?';
     params.push(image);
