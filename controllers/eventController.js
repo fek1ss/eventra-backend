@@ -27,7 +27,7 @@ exports.createEvent = (req, res) => {
 
 // Получить все мероприятия / фильтрация
 exports.getEvents = (req, res) => {
-  let query = 'SELECT * FROM events';
+  let query = 'SELECT * FROM events ORDER BY date, time asc';
   const { category } = req.query;
 
   if (category) query += ' WHERE category = ' + db.escape(category);
