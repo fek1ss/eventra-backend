@@ -8,7 +8,7 @@ exports.createEvent = async (req, res) => {
     let image = null;
     if (req.file) {
       const host = req.get('host');
-      image = `${req.protocol}://${host}/uploads/${req.file.filename}`;
+      image = `https://${host}/uploads/${req.file.filename}`;
     }
 
     const query = `
