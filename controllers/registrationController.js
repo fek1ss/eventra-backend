@@ -1,12 +1,14 @@
 const db = require('../config/db');
 
 // Регистрация на мероприятие
-exports.registerForEvent = (req, res) => {
-  const { event_id, user_id, first_name, last_name, phone, isPaid } = req.body;
+exports.registerForEvent = async (req, res) => {
+  try {
+    const { event_id, user_id, first_name, last_name, phone, isPaid } = req.body;
 
-  const query = 'INSERT INTO registrations (event_id, user_id, first_name, last_name, phone) VALUES (?, ?, ?, ?, ?)';
-  db.query(query, [event_id, user_id, first_name, last_name, phone], (err) => {
-    if (err) return res.status(500).json({ message: err.message });
+    await db.query(
+      'INSERT INTO registrations (event_id, user_id, first_name, last_name, phone) VALUES (?, ?, ?, ?, ?)',
+      [event_id, user_id, first_name, last_name, phone]
+    );
 
     if (isPaid) {
       const whatsappLink = `https://wa.me/1234567890?text=Я хочу купить билет на мероприятие ${event_id}`;
@@ -14,20 +16,24 @@ exports.registerForEvent = (req, res) => {
     }
 
     res.json({ message: 'Регистрация успешна' });
-  });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 // История мероприятий пользователя
-exports.getUserEvents = (req, res) => {
-  const { user_id } = req.params;
-  const query = `
-    SELECT e.*, r.id as registration_id 
-    FROM events e 
-    JOIN registrations r ON e.id = r.event_id 
-    WHERE r.user_id = ?
-  `;
-  db.query(query, [user_id], (err, results) => {
-    if (err) return res.status(500).json({ message: err.message });
+exports.getUserEvents = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const query = `
+      SELECT e.*, r.id as registration_id 
+      FROM events e 
+      JOIN registrations r ON e.id = r.event_id 
+      WHERE r.user_id = ?
+    `;
+    const [results] = await db.query(query, [user_id]);
     res.json(results);
-  });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
