@@ -12,7 +12,8 @@ const app = express();
 // CORS
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://eventra-narxoz.vercel.app'
+  'https://eventra-narxoz.vercel.app',
+  'https://eventra-backend-production.up.railway.app'
 ];
 
 app.use(cors({
