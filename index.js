@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const db = require('./config/db'); // твой db.js
+const db = require('./config/db'); // твой pool.js, promise pool
 
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
@@ -23,11 +23,15 @@ app.use(cors({
     } else {
       callback(new Error('Not allowed by CORS'));
     }
-  }
+  },
+  credentials: true // если будешь использовать куки
 }));
 
+// Для парсинга JSON
 app.use(express.json());
-app.use('/uploads', express.static('uploads')); // для картинок
+
+// Для статики (картинок)
+app.use('/uploads', express.static('uploads'));
 
 // Роуты
 app.use('/auth', authRoutes);
@@ -39,15 +43,9 @@ const PORT = process.env.PORT || 5000;
 (async () => {
   try {
     console.log('⏳ Проверка соединения с базой...');
-    
-    // Проверка соединения
-    await new Promise((resolve, reject) => {
-      db.query('SELECT 1', (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
 
+    // Проверка соединения с promise pool
+    const [rows] = await db.query('SELECT 1');
     console.log('✅ База данных доступна!');
 
     app.listen(PORT, () => {
