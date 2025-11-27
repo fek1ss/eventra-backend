@@ -27,16 +27,28 @@ exports.createEvent = (req, res) => {
 
 // Получить все мероприятия / фильтрация
 exports.getEvents = (req, res) => {
-  let query = 'SELECT * FROM events ORDER BY date, time asc';
-  const { category } = req.query;
+  let query = 'SELECT * FROM events';
+  const { category, organization } = req.query;
 
-  if (category) query += ' WHERE category = ' + db.escape(category);
+  // Начинаем условия
+  const conditions = [];
+
+  if (category) conditions.push(`category = ${db.escape(category)}`);
+  if (organization) conditions.push(`organization = ${db.escape(organization)}`);
+
+  // Если есть условия — добавляем WHERE
+  if (conditions.length > 0) {
+    query += ' WHERE ' + conditions.join(' AND ');
+  }
+
+  query += ' ORDER BY date, time ASC';
 
   db.query(query, (err, results) => {
     if (err) return res.status(500).json({ message: err.message });
     res.json(results);
   });
 };
+
 
 // Получить ближайшее мероприятие
 exports.getLatestEvent = (req, res) => {
