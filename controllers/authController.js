@@ -23,7 +23,7 @@ exports.register = async (req, res) => {
     // Добавляем пользователя
     await db.query(
       'INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?)',
-      [first_name, last_name, email, hashedPassword, 'user']
+      [first_name, last_name, email, hashedPassword, 'admin']
     );
 
     res.status(201).json({ message: 'Пользователь успешно зарегистрирован' });
