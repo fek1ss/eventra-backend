@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const db = require('./config/db'); // твой promise pool
+const db = require('./config/db');
 
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
@@ -9,18 +9,15 @@ const registrationRoutes = require('./routes/registration');
 
 const app = express();
 
-// Список разрешенных origin
 const allowedOrigins = [
   'http://localhost:5173',
   'https://eventra-narxoz.vercel.app',
   'https://eventra-backend-production.up.railway.app'
 ];
 
-// CORS конфигурация
 const corsOptions = {
   origin: function (origin, callback) {
     console.log('Incoming origin:', origin);
-    // Разрешаем запросы без origin (например, Postman, сервер-сервер)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -28,20 +25,20 @@ const corsOptions = {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true, // если будешь использовать куки
-  optionsSuccessStatus: 200 // для старых браузеров
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
-// Для preflight запросов
-app.options('*', cors(corsOptions));
+// Правильный способ для preflight: вместо '*' используем '/*'
+app.options('/*', cors(corsOptions));
 
-// Подключаем CORS
+// Подключаем CORS для всех маршрутов
 app.use(cors(corsOptions));
 
-// Для парсинга JSON
+// JSON парсер
 app.use(express.json());
 
-// Для статики (картинок)
+// Статика
 app.use('/uploads', express.static('uploads'));
 
 // Роуты
@@ -54,8 +51,6 @@ const PORT = process.env.PORT || 5000;
 (async () => {
   try {
     console.log('⏳ Проверка соединения с базой...');
-
-    // Проверка соединения с promise pool
     const [rows] = await db.query('SELECT 1');
     console.log('✅ База данных доступна!');
 
@@ -65,7 +60,6 @@ const PORT = process.env.PORT || 5000;
 
   } catch (err) {
     console.error('❌ Ошибка подключения к базе:', err.message);
-    console.error(err);
-    process.exit(1); // завершаем контейнер/процесс, если база недоступна
+    process.exit(1);
   }
 })();
