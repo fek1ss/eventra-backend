@@ -76,30 +76,40 @@ exports.getEventById = async (req, res) => {
 exports.updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, date, time, organization, category, location, price } = req.body;
+    const allowedFields = ['title', 'description', 'date', 'time', 'organization', 'category', 'location', 'price'];
+    const fields = [];
+    const values = [];
 
-    let query = `
-      UPDATE events 
-      SET title = ?, description = ?, date = ?, time = ?, organization = ?, category = ?, location = ?, price = ?
-    `;
-    const params = [title, description, date, time, organization, category, location, price];
+    // Формируем массив полей и значений только для тех, что есть в req.body
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        fields.push(`${field} = ?`);
+        values.push(req.body[field]);
+      }
+    });
 
+    // Если есть картинка
     if (req.file) {
       const host = req.get('host');
       const image = `${req.protocol}://${host}/uploads/${req.file.filename}`;
-      query += ', image = ?';
-      params.push(image);
+      fields.push('image = ?');
+      values.push(image);
     }
 
-    query += ' WHERE id = ?';
-    params.push(id);
+    if (fields.length === 0) {
+      return res.status(400).json({ message: 'Нет данных для обновления' });
+    }
 
-    await db.query(query, params);
+    const query = `UPDATE events SET ${fields.join(', ')} WHERE id = ?`;
+    values.push(id);
+
+    await db.query(query, values);
     res.json({ message: 'Мероприятие обновлено' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // Удаление мероприятия
 exports.deleteEvent = async (req, res) => {
