@@ -17,11 +17,9 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log('Incoming origin:', origin);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.warn('Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -29,10 +27,7 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 
-// Правильный способ для preflight: вместо '*' используем '/*'
-app.options('/*', cors(corsOptions));
-
-// Подключаем CORS для всех маршрутов
+// Подключаем CORS для всех маршрутов (не нужно app.options('*', ...))
 app.use(cors(corsOptions));
 
 // JSON парсер
