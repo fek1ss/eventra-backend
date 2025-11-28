@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const db = require('./config/db'); // твой pool.js, promise pool
+const db = require('./config/db'); // твой promise pool
 
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
@@ -9,23 +9,34 @@ const registrationRoutes = require('./routes/registration');
 
 const app = express();
 
-// CORS
+// Список разрешенных origin
 const allowedOrigins = [
   'http://localhost:5173',
   'https://eventra-narxoz.vercel.app',
   'https://eventra-backend-production.up.railway.app'
 ];
 
-app.use(cors({
-  origin: function(origin, callback){
+// CORS конфигурация
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log('Incoming origin:', origin);
+    // Разрешаем запросы без origin (например, Postman, сервер-сервер)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.warn('Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true // если будешь использовать куки
-}));
+  credentials: true, // если будешь использовать куки
+  optionsSuccessStatus: 200 // для старых браузеров
+};
+
+// Для preflight запросов
+app.options('*', cors(corsOptions));
+
+// Подключаем CORS
+app.use(cors(corsOptions));
 
 // Для парсинга JSON
 app.use(express.json());
