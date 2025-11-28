@@ -18,7 +18,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function(origin, callback){
-    if (!origin  allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -38,7 +38,7 @@ app.use('/auth', authRoutes);
 app.use('/events', eventRoutes);
 app.use('/registration', registrationRoutes);
 
-const PORT = process.env.PORT  5000;
+const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
@@ -49,7 +49,7 @@ const PORT = process.env.PORT  5000;
     console.log('✅ База данных доступна!');
 
     app.listen(PORT, () => {
-      console.log(🚀 Сервер запущен на http://localhost:${PORT});
+      console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
     });
 
   } catch (err) {
