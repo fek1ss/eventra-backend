@@ -5,14 +5,14 @@ exports.registerForEvent = async (req, res) => {
   try {
     const { event_id, user_id, first_name, last_name, phone } = req.body;
 
-    // --- Проверка на заполненность полей ---
+    // --- 1. Проверяем, что все поля заполнены ---
     if (!event_id || !user_id || !first_name || !last_name || !phone) {
       return res.status(400).json({ message: "Заполните все поля" });
     }
 
-    // --- 1. Проверяем, существует ли событие ---
+    // --- 2. Получаем мероприятие и номер ответственного ---
     const [eventRows] = await db.query(
-      "SELECT title FROM events WHERE id = ?",
+      "SELECT title, responsible_phone FROM events WHERE id = ?",
       [event_id]
     );
 
@@ -21,8 +21,13 @@ exports.registerForEvent = async (req, res) => {
     }
 
     const eventTitle = eventRows[0].title || "Мероприятие";
+    const responsiblePhone = eventRows[0].responsible_phone;
 
-    // --- 2. Проверка на повторную регистрацию ---
+    if (!responsiblePhone) {
+      return res.status(400).json({ message: "Номер ответственного не указан" });
+    }
+
+    // --- 3. Проверка на повторную регистрацию ---
     const [existing] = await db.query(
       "SELECT id FROM registrations WHERE event_id = ? AND user_id = ?",
       [event_id, user_id]
@@ -34,26 +39,23 @@ exports.registerForEvent = async (req, res) => {
       });
     }
 
-    // --- 3. Записываем регистрацию ---
+    // --- 4. Записываем регистрацию ---
     await db.query(
       "INSERT INTO registrations (event_id, user_id, first_name, last_name, phone) VALUES (?, ?, ?, ?, ?)",
       [event_id, user_id, first_name, last_name, phone]
     );
 
-    // --- 4. Формируем WhatsApp ссылку ---
+    // --- 5. Формируем WhatsApp ссылку на ответственного ---
+    // Убираем "+" на iOS
+    const phoneNumber = responsiblePhone.replace(/\+/g, '');
 
-    // WhatsApp на iOS не работает со знаком "+"
-    const phoneNumber = "77056689441"; // без +
+    // Полностью кодируем текст сообщения
+    const messageText = `Здравствуйте! Пишу с платформы Eventra. Мероприятие: ${eventTitle}`;
+    const encodedMessage = encodeURIComponent(messageText);
 
-    // Формируем текст сообщения полностью
-    const message = `Здравствуйте! Пишу вам с платформы Eventra. Хочу зарегистрироваться на мероприятие: ${eventTitle}`;
-
-    // Кодируем весь текст
-    const encodedMessage = encodeURIComponent(message);
-
-    // Итоговая ссылка
     const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
+    // --- 6. Возвращаем успешный результат ---
     return res.status(200).json({
       message: "Регистрация успешна",
       whatsappLink,
@@ -66,6 +68,7 @@ exports.registerForEvent = async (req, res) => {
     });
   }
 };
+
 
 
 // История мероприятий пользователя

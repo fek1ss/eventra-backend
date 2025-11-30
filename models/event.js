@@ -2,12 +2,16 @@ const db = require('../config/db');
 
 // Создать мероприятие
 exports.createEvent = (data, callback) => {
-  const { title, description, date, organization, category, image, location, price } = data;
+  const { title, description, date, organization, category, image, location, price, responsible_phone } = data;
 
   const query =
-    'INSERT INTO events (title, description, date, organization, category, image, location, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    'INSERT INTO events (title, description, date, organization, category, image, location, price, responsible_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-  db.query(query, [title, description, date, organization, category, image, location, price], callback);
+  db.query(
+    query,
+    [title, description, date, organization, category, image, location, price, responsible_phone],
+    callback
+  );
 };
 
 // Получить все мероприятия
@@ -25,11 +29,9 @@ exports.getEventById = (id, callback) => {
 
 // Обновить мероприятие
 exports.updateEvent = (id, data, callback) => {
-  const { title, description, date, organization, category, image, location, price } = data;
+  const { title, description, date, organization, category, image, location, price, responsible_phone } = data;
 
-  let query =
-    'UPDATE events SET title = ?, description = ?, date = ?, organization = ?, category = ?, location = ?, price = ?';
-
+  let query = 'UPDATE events SET title = ?, description = ?, date = ?, organization = ?, category = ?, location = ?, price = ?';
   const params = [title, description, date, organization, category, location, price];
 
   if (image) {
@@ -37,11 +39,17 @@ exports.updateEvent = (id, data, callback) => {
     params.push(image);
   }
 
+  if (responsible_phone) {
+    query += ', responsible_phone = ?';
+    params.push(responsible_phone);
+  }
+
   query += ' WHERE id = ?';
   params.push(id);
 
   db.query(query, params, callback);
 };
+
 
 // Удалить мероприятие
 exports.deleteEvent = (id, callback) => {

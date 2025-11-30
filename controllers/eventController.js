@@ -3,7 +3,7 @@ const db = require('../config/db');
 // Создание мероприятия (админ)
 exports.createEvent = async (req, res) => {
   try {
-    const { title, description, date, time, organization, category, location, price } = req.body;
+    const { title, description, date, time, organization, category, location, price, responsible_phone } = req.body;
 
     let image = null;
     if (req.file) {
@@ -12,10 +12,11 @@ exports.createEvent = async (req, res) => {
     }
 
     const query = `
-      INSERT INTO events (title, description, date, time, organization, category, image, location, price)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    const [result] = await db.query(query, [title, description, date, time, organization, category, image, location, price]);
+      INSERT INTO events (title, description, date, time, organization, category, image, location, price, responsible_phone)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+    const [result] = await db.query(query, [title, description, date, time, organization, category, image, location, price, responsible_phone]);
 
     res.status(201).json({ message: 'Мероприятие создано', eventId: result.insertId });
   } catch (err) {
@@ -76,7 +77,7 @@ exports.getEventById = async (req, res) => {
 exports.updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const allowedFields = ['title', 'description', 'date', 'time', 'organization', 'category', 'location', 'price'];
+    const allowedFields = ['title', 'description', 'date', 'time', 'organization', 'category', 'location', 'price', 'responsible_phone'];
     const fields = [];
     const values = [];
 
