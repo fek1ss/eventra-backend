@@ -6,6 +6,7 @@ const db = require('./config/db'); // твой pool.js, promise pool
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
 const registrationRoutes = require('./routes/registration');
+const userStatsRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -37,6 +38,8 @@ app.use('/uploads', express.static('uploads'));
 app.use('/auth', authRoutes);
 app.use('/events', eventRoutes);
 app.use('/registration', registrationRoutes);
+app.use("/users", userStatsRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 
